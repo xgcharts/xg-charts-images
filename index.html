@@ -52,7 +52,7 @@ function rowLabel(r){const name=fieldOf(r,'Title','Video Title','Video Name','So
 function parseGVIZ(text){const start=text.indexOf('{'),end=text.lastIndexOf('}');if(start<0||end<start)throw Error('Invalid Sheets response (check sharing permissions)');const obj=JSON.parse(text.slice(start,end+1));if(obj.status==='error')throw Error((obj.errors||[]).map(e=>e.message).join('; ')||'Google Sheets error');return obj.table||{cols:[],rows:[]}}
 function convertTable(table){const cols=table.cols||[];const raw=(table.rows||[]).map(row=>cols.map((_,i)=>{const c=row.c?.[i];return c?.f??c?.v??''}));if(!raw.length)return [];
 // Request headers=0 to preserve the real first sheet row; infer the header from recognizable column names.
-const known=['title','type','platform','region','chartname','currentrank','previousrank','status','lastupdated','date','videotitle','videoid','countryregion','position','rank','change','peak'];
+const known=['title','type','platform','region','chartname','currentrank','previousrank','status','lastupdated','date','videotitle','videoid','countryregion','position','rank','change','peak','listeners','daily','peaklisteners','dailystreams','totalstreams','p','songid','song','previousstreams','currentstreams','dailychange'];
 let best=0,bestScore=-1;for(let i=0;i<Math.min(raw.length,12);i++){const score=raw[i].reduce((s,v)=>s+(known.includes(norm(v))?1:0),0);if(score>bestScore){best=i;bestScore=score}}
 let headers;if(bestScore>=2){headers=raw[best].map((v,i)=>str(v)||`Column ${i+1}`);return raw.slice(best+1).filter(row=>row.some(v=>str(v))).map(row=>Object.fromEntries(headers.map((h,i)=>[h,row[i]??''])))}
 // Fallback for a GVIZ table that supplies its headers as column labels.
@@ -87,22 +87,56 @@ function loadPreset(){try{const raw=localStorage.getItem('xg-image-builder-v1');
 $('refresh').onclick=()=>{loadSheets();loadOverview()};$('source').onchange=()=>{$('search').value='';refreshFilters()};$('search').oninput=refreshResults;$('filterField').onchange=refreshValues;$('filterValue').onchange=refreshResults;$('prevResults').onclick=()=>{resultOffset=Math.max(0,resultOffset-PAGE_SIZE);renderResults()};$('nextResults').onclick=()=>{resultOffset+=PAGE_SIZE;renderResults()};$('addVisible').onclick=()=>addRows(visible);$('clearSelected').onclick=()=>{chosen=[];refreshFields();renderSelected();renderResults();updatePages()};$('sortSelected').onclick=()=>{chosen.sort((a,b)=>rank(fieldOf(a,'Current Rank','Rank','Position'))-rank(fieldOf(b,'Current Rank','Rank','Position')));renderSelected();updatePages()};$('allFields').onclick=()=>{fields.forEach(f=>f.enabled=true);renderFields();updatePages()};$('fewFields').onclick=()=>{fields.forEach(f=>f.enabled=['title','videotitle','platform','chartname','chart','region','countryregion','currentrank','rank','change','peak','status','lastupdated'].includes(norm(f.name)));renderFields();updatePages()};['format','perpage'].forEach(id=>$(id).onchange=updatePages);['imageTitle','imageSubtitle'].forEach(id=>$(id).oninput=render);$('page').onchange=render;$('download').onclick=async()=>{try{await downloadPNG(Number($('page').value)||0)}catch(e){alert(e.message)}};$('downloadAll').onclick=async()=>{try{for(let i=0;i<pages.length;i++){await downloadPNG(i);await new Promise(r=>setTimeout(r,500))}render()}catch(e){alert(e.message)}};$('savePreset').onclick=savePreset;$('loadPreset').onclick=loadPreset;
 
 /* OVERVIEW METRICS: independent from the existing chart image builder. */
-const ovNum=x=>{const n=Number(String(x??'').replace(/[,\s]/g,''));return Number.isFinite(n)?n:NaN};
+const ovNum=x=>{const t=String(x??'').trim().replace(/[,\s]/g,'');if(!t||t==='—'||t==='-')return NaN;const n=Number(t);return Number.isFinite(n)?n:NaN};
 const ovFmt=n=>Number.isFinite(n)?Math.round(n).toLocaleString('en-US'):'—';
 function ovDate(v){if(v instanceof Date&&!isNaN(v))return v.toISOString().slice(0,10);const t=str(v);let m=t.match(/^Date\((\d+),(\d+),(\d+)/);if(m)return `${m[1]}-${String(+m[2]+1).padStart(2,'0')}-${m[3].padStart(2,'0')}`;m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;m=t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;return ''}
 function ovField(row,...names){for(const n of names){const key=Object.keys(row).find(k=>norm(k)===norm(n));if(key!==undefined)return row[key]}return ''}
 function ovLatest(rows){return rows.map((r,i)=>({r,i,date:ovDate(ovField(r,'Date'))})).filter(x=>x.date).sort((a,b)=>a.date.localeCompare(b.date)||a.i-b.i).at(-1)?.r||null}
 function ovPercent(diff,previous){return previous>0?` (${diff>=0?'+':''}${(100*diff/previous).toFixed(2)}%)`:''}
-function ovMetrics(){const monthly=ovLatest(overviewData.MonthlyListeners||[]);const daily=ovLatest(overviewData.SpotifyDailyHistory||[]);const totals=overviewData.SpotifyTotalStreams||[];const totalRow=totals.find(r=>Object.values(r).some(v=>/^total$/i.test(str(v))));const totalFromSongs=totalRow?ovNum(ovField(totalRow,'Total Streams','Current Streams','Streams','Total')):NaN;
- const listeners=monthly?ovNum(ovField(monthly,'Listeners')):NaN;const monthlyDelta=monthly?ovNum(ovField(monthly,'Daily +/-')):NaN;const peak=monthly?ovNum(ovField(monthly,'Peak Listeners','PkListeners')):NaN;
- const catalog=daily?ovNum(ovField(daily,'Total Streams')):NaN;const dailyStreams=daily?ovNum(ovField(daily,'Daily Streams')):NaN;const dailyDelta=daily?ovNum(ovField(daily,'P+','Daily +/-','Change')):NaN;const dailyPctRaw=daily?str(ovField(daily,'P%')):'';const dailyPct=dailyPctRaw.includes('%')?ovNum(dailyPctRaw.replace('%','')):NaN;
- return {catalog:{title:'Spotify · Catalog streams',value:Number.isFinite(catalog)?catalog:totalFromSongs,detail:`Updated: ${daily?ovDate(ovField(daily,'Date')):'—'}`},daily:{title:'Spotify · Daily streams',value:dailyStreams,detail:Number.isFinite(dailyDelta)?`${dailyDelta>0?'+':''}${ovFmt(dailyDelta)}${Number.isFinite(dailyPct)?` (${dailyPct>0?'+':''}${dailyPct.toFixed(2)}%)`:ovPercent(dailyDelta,dailyStreams-dailyDelta)} vs. previous day`:'Change unavailable',extra:`Updated: ${daily?ovDate(ovField(daily,'Date')):'—'}`,negative:dailyDelta<0},monthly:{title:'Spotify · Monthly listeners',value:listeners,detail:Number.isFinite(monthlyDelta)?`${monthlyDelta>0?'+':''}${ovFmt(monthlyDelta)}${ovPercent(monthlyDelta,listeners-monthlyDelta)} vs. previous day`:'Change unavailable',extra:`Historical peak: ${ovFmt(peak)} · Updated: ${monthly?ovDate(ovField(monthly,'Date')):'—'}`,negative:monthlyDelta<0},achievements:{title:'Chart achievements',value:ovNum($('overviewAchievements').value),detail:'Records in Charts · manual'}}}
+// The GVIZ endpoint can return column letters (A, B, C...) instead of sheet headers.
+// Overview uses the known four/five-column layouts, without changing Chart Image Builder.
+function ovColumn(row, index, ...names){
+  if(!row)return '';
+  const named=ovField(row,...names);
+  if(named!==''&&named!==null&&named!==undefined)return named;
+  const letter=String.fromCharCode(65+index);
+  const key=Object.keys(row).find(k=>norm(k)===norm(letter)||norm(k)===norm('Column '+(index+1)));
+  return key===undefined?'':row[key];
+}
+function ovValidDateRow(rows){
+  return rows.map((r,i)=>({r,i,date:ovDate(ovColumn(r,0,'Date'))}))
+    .filter(x=>x.date&&Number(x.date.slice(0,4))>=2020)
+    .sort((a,b)=>a.date.localeCompare(b.date)||a.i-b.i).at(-1)?.r||null;
+}
+function ovMetrics(){
+ const monthly=ovValidDateRow(overviewData.MonthlyListeners||[]);
+ const daily=ovValidDateRow(overviewData.SpotifyDailyHistory||[]);
+ const totals=overviewData.SpotifyTotalStreams||[];
+ const totalRow=totals.find(r=>Object.values(r).some(v=>/^total$/i.test(str(v))));
+ const totalFromSongs=totalRow?ovNum(ovColumn(totalRow,2,'Total Streams','Current Streams','Streams','Total')):NaN;
+ const listeners=monthly?ovNum(ovColumn(monthly,1,'Listeners')):NaN;
+ const monthlyDelta=monthly?ovNum(ovColumn(monthly,2,'Daily +/-')):NaN;
+ const peak=monthly?ovNum(ovColumn(monthly,3,'Peak Listeners','PkListeners')):NaN;
+ const catalog=daily?ovNum(ovColumn(daily,1,'Total Streams')):NaN;
+ const dailyStreams=daily?ovNum(ovColumn(daily,2,'Daily Streams')):NaN;
+ const dailyDelta=daily?ovNum(ovColumn(daily,3,'P+','Daily +/-','Change')):NaN;
+ const dailyPctRaw=daily?str(ovColumn(daily,4,'P%')):'';
+ const dailyPct=dailyPctRaw.includes('%')?ovNum(dailyPctRaw.replace('%','')):NaN;
+ const dailyDate=daily?ovDate(ovColumn(daily,0,'Date')):'—';
+ const monthlyDate=monthly?ovDate(ovColumn(monthly,0,'Date')):'—';
+ return {
+  catalog:{title:'Spotify · Catalog streams',value:Number.isFinite(catalog)?catalog:totalFromSongs,detail:`Updated: ${dailyDate}`},
+  daily:{title:'Spotify · Daily streams',value:dailyStreams,detail:Number.isFinite(dailyDelta)?`${dailyDelta>0?'+':''}${ovFmt(dailyDelta)}${Number.isFinite(dailyPct)?` (${dailyPct>0?'+':''}${dailyPct.toFixed(2)}%)`:ovPercent(dailyDelta,dailyStreams-dailyDelta)} vs. previous day`:'Change unavailable',extra:`Updated: ${dailyDate}`,negative:dailyDelta<0},
+  monthly:{title:'Spotify · Monthly listeners',value:listeners,detail:Number.isFinite(monthlyDelta)?`${monthlyDelta>0?'+':''}${ovFmt(monthlyDelta)}${ovPercent(monthlyDelta,listeners-monthlyDelta)} vs. previous day`:'Change unavailable',extra:`Historical peak: ${ovFmt(peak)} · Updated: ${monthlyDate}`,negative:monthlyDelta<0},
+  achievements:{title:'Chart achievements',value:ovNum($('overviewAchievements').value),detail:'Records in Charts · manual'}
+ };
+}
 function ovSelected(){return [...document.querySelectorAll('.overviewMetric:checked')].map(el=>el.value)}
 function ovRoundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();ctx.stroke()}
 function ovText(ctx,t,x,y,max,font,min=18){let size=font;do{ctx.font=`700 ${size}px Arial`;if(ctx.measureText(t).width<=max)break;size-=2}while(size>min);ctx.fillText(t,x,y)}
 function overviewCanvas(){const format=$('overviewFormat').value;const [w,h]=format==='square'?[1080,1080]:format==='portrait'?[1080,1350]:[1600,900];const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.fillStyle='#F2F2F2';ctx.fillRect(0,0,w,h);const pad=w===1600?75:55;ctx.fillStyle='#277FF2';ctx.fillRect(pad,48,8,44);ctx.fillStyle='#223A59';ctx.font='bold 29px Arial';ctx.fillText('XG CHARTS',pad+25,80);ovText(ctx,str($('overviewTitle').value)||'XG — Overview',pad,155,w-2*pad,48,24);ctx.fillStyle='#5B7290';ctx.font='23px Arial';ctx.fillText(str($('overviewSubtitle').value),pad,194);const selected=ovSelected();const data=ovMetrics();const count=selected.length;const gap=22;const gridCols=w===1600?(count===1?1:2):1;const gridRows=Math.ceil(count/gridCols);const startY=230;const endY=h-108;const cardW=(w-2*pad-(gridCols-1)*gap)/gridCols;const cardH=count?Math.min(310,(endY-startY-(gridRows-1)*gap)/gridRows):0;selected.forEach((key,i)=>{const item=data[key];const col=i%gridCols,row=Math.floor(i/gridCols),x=pad+col*(cardW+gap),y=startY+row*(cardH+gap);ctx.fillStyle='#FFFFFF';ctx.strokeStyle='#D7E4F4';ctx.lineWidth=2;ovRoundRect(ctx,x,y,cardW,cardH,16);const inner=x+26;ctx.fillStyle='#223A59';ctx.font=`${w===1600?24:22}px Arial`;ctx.fillText(item.title,inner,y+46);ctx.fillStyle='#142B4D';ovText(ctx,ovFmt(item.value),inner,y+Math.min(132,cardH*.53),cardW-52,w===1600?58:54,24);ctx.fillStyle=item.negative?'#D93655':item.detail.startsWith('+')?'#16856B':'#647D9B';ctx.font=`${w===1600?19:18}px Arial`;const detail=item.detail||'';const available=cardW-52;ctx.fillText(truncate(ctx,detail,available),inner,y+cardH-55);if(item.extra){ctx.fillStyle='#647D9B';ctx.font='17px Arial';ctx.fillText(truncate(ctx,item.extra,available),inner,y+cardH-27)}});if(!count){ctx.fillStyle='#223A59';ctx.font='26px Arial';ctx.fillText('Select at least one metric.',pad,330)}ctx.fillStyle='#D1DFEF';ctx.fillRect(pad,h-80,w-pad*2,2);ctx.fillStyle='#277FF2';ctx.font='bold 24px Arial';ctx.fillText('xgcharts.com',pad,h-35);return c}
 function renderOverview(){const target=$('overviewPreview'),source=overviewCanvas();target.width=source.width;target.height=source.height;target.getContext('2d').drawImage(source,0,0);$('overviewDownload').disabled=!ovSelected().length}
-async function loadOverview(){const btn=$('overviewRefresh');btn.disabled=true;$('overviewStatus').textContent='Loading overview metrics…';const results=await Promise.all(OVERVIEW_SHEETS.map(async sheet=>{try{overviewData[sheet]=await fetchSheet(sheet);return `${sheet}: ${overviewData[sheet].length} records`}catch(e){overviewData[sheet]=[];return `${sheet}: ERROR ${e.message}`}}));$('overviewStatus').textContent=results.join('\n');btn.disabled=false;renderOverview()}
+async function loadOverview(){const btn=$('overviewRefresh');btn.disabled=true;$('overviewStatus').textContent='Loading overview metrics…';const results=await Promise.all(OVERVIEW_SHEETS.map(async sheet=>{try{overviewData[sheet]=await fetchSheet(sheet);return `${sheet}: ${overviewData[sheet].length} records${overviewData[sheet].length?' · Fields: '+Object.keys(overviewData[sheet][0]).join(', '):''}`}catch(e){overviewData[sheet]=[];return `${sheet}: ERROR ${e.message}`}}));$('overviewStatus').textContent=results.join('\n');btn.disabled=false;renderOverview()}
 $('overviewRefresh').onclick=loadOverview;
 document.querySelectorAll('.overviewMetric').forEach(el=>el.onchange=renderOverview);
 ['overviewTitle','overviewSubtitle','overviewAchievements'].forEach(id=>$(id).oninput=renderOverview);
