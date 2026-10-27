@@ -421,8 +421,7 @@ function timeKey(value) {
     Number(m[3] || 0)
   );
 }
-
-/* =========================================================
+  /* =========================================================
    GOOGLE SHEETS READER
 ========================================================= */
 
@@ -490,6 +489,10 @@ function toObjects(matrix) {
       return obj;
     });
 }
+
+/* =========================================================
+   LOAD GOOGLE SHEETS
+========================================================= */
 
 async function loadSheets() {
   $('status').textContent =
@@ -831,8 +834,7 @@ function makeGroups() {
       a.subtitle.localeCompare(b.subtitle)
     );
 }
-
-/* =========================================================
+  /* =========================================================
    SELECTORS
 ========================================================= */
 
@@ -861,17 +863,10 @@ function rebuild() {
   groups = makeGroups();
 
   const titles = [
-    ...new Set(
-      groups.map(group => group.title)
-    )
+    ...new Set(groups.map(group => group.title))
   ];
 
-  setOptions(
-    'title',
-    titles,
-    oldTitle
-  );
-
+  setOptions('title', titles, oldTitle);
   selectTitle();
 }
 
@@ -883,17 +878,10 @@ function selectTitle() {
   );
 
   const charts = [
-    ...new Set(
-      available.map(group => group.subtitle)
-    )
+    ...new Set(available.map(group => group.subtitle))
   ];
 
-  setOptions(
-    'chart',
-    charts,
-    oldChart
-  );
-
+  setOptions('chart', charts, oldChart);
   selectChart();
 }
 
@@ -928,11 +916,9 @@ function updatePages() {
   pages = [];
 
   if (current && current.rows.length) {
-
     const [width, fixedHeight] = formatInfo();
 
     const scale = width / 1200;
-
     const top = Math.round(235 * scale);
     const rowHeight = Math.round(47 * scale);
     const footer = Math.round(85 * scale);
@@ -945,9 +931,7 @@ function updatePages() {
 
     const safeRows = Math.max(
       1,
-      Math.floor(
-        availableHeight / rowHeight
-      )
+      Math.floor(availableHeight / rowHeight)
     );
 
     const requested =
@@ -1019,7 +1003,6 @@ function drawImage(pageIndex) {
   const rows = pages[pageIndex] || pages[0];
 
   const [width, fixedHeight] = formatInfo();
-
   const scale = width / 1200;
 
   const S = number =>
@@ -1053,6 +1036,7 @@ function drawImage(pageIndex) {
   /* Brand */
 
   ctx.fillStyle = '#277FF2';
+
   ctx.fillRect(
     S(42),
     S(28),
@@ -1154,7 +1138,6 @@ function drawImage(pageIndex) {
   /* Rows */
 
   rows.forEach((row, rowIndex) => {
-
     const y =
       tableTop +
       rowHeight * (rowIndex + 1);
@@ -1172,7 +1155,6 @@ function drawImage(pageIndex) {
     );
 
     row.forEach((cell, cellIndex) => {
-
       const content = str(cell);
 
       const maxWidth = worldwide
@@ -1202,29 +1184,21 @@ function drawImage(pageIndex) {
         `${fontSize}px Arial`;
 
       if (cellIndex === 2) {
-
         if (content.startsWith('+')) {
           ctx.fillStyle = '#087F68';
-
         } else if (content.startsWith('-')) {
           ctx.fillStyle = '#C24755';
-
         } else if (
           content.toUpperCase() === 'NE' ||
           content.toUpperCase() === 'NEW'
         ) {
           ctx.fillStyle = '#277FF2';
-
         } else {
           ctx.fillStyle = '#223A59';
         }
-
       } else if (content.startsWith('#')) {
-
         ctx.fillStyle = '#087F68';
-
       } else {
-
         ctx.fillStyle = '#223A59';
       }
 
@@ -1248,7 +1222,6 @@ function drawImage(pageIndex) {
   );
 
   ctx.fillStyle = '#277FF2';
-
   ctx.font = `bold ${S(23)}px Arial`;
 
   ctx.fillText(
@@ -1266,7 +1239,6 @@ function drawImage(pageIndex) {
 
 function render() {
   if (!current || !pages.length) {
-
     $('count').textContent =
       'No current ranking positions available for this source.';
 
