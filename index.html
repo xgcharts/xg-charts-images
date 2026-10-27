@@ -9,61 +9,86 @@
 :root {
   --bg: #101a2b;
   --panel: #17263e;
+  --field: #1c304c;
   --line: #354e6d;
   --muted: #a7b9d2;
   --blue: #277FF2;
+  --navy: #223A59;
+  --sky: #88C1F2;
 }
-* { box-sizing: border-box; }
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   background: var(--bg);
   color: #f4f8ff;
-  font: 15px system-ui, Arial, sans-serif;
+  font: 15px system-ui, -apple-system, Arial, sans-serif;
 }
+
 header {
-  padding: 22px max(20px,4vw);
+  padding: 20px 24px;
   background: #202f46;
   border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
-  gap: 14px;
   align-items: center;
+  gap: 16px;
   flex-wrap: wrap;
 }
-h1 { font-size: 23px; margin: 0; }
-header small { color: var(--muted); }
+
+h1 {
+  margin: 0;
+  font-size: 23px;
+}
+
+header small {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 main {
   max-width: 1550px;
   margin: auto;
   padding: 24px;
   display: grid;
-  grid-template-columns: minmax(290px,390px) minmax(0,1fr);
+  grid-template-columns: minmax(290px, 390px) minmax(0, 1fr);
   gap: 22px;
 }
+
 .panel {
+  min-width: 0;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 15px;
   padding: 22px;
-  min-width: 0;
 }
-h2 { margin: 0 0 15px; font-size: 18px; }
+
+h2 {
+  margin: 0 0 17px;
+  font-size: 18px;
+}
+
 label {
   display: block;
-  margin: 16px 0 6px;
+  margin: 16px 0 7px;
   color: #c6d8f0;
-  font-weight: 600;
+  font-weight: 650;
   font-size: 13px;
 }
+
 select {
   width: 100%;
-  background: #1c304c;
+  background: var(--field);
   color: white;
   border: 1px solid #456181;
-  border-radius: 8px;
+  border-radius: 9px;
   padding: 12px;
   font: inherit;
 }
+
 button {
   background: var(--blue);
   color: white;
@@ -74,45 +99,77 @@ button {
   font-weight: 700;
   cursor: pointer;
 }
-button.secondary { background: #304b6e; }
-button:disabled { opacity: .5; cursor: default; }
+
+button:hover {
+  filter: brightness(1.1);
+}
+
+button.secondary {
+  background: #304b6e;
+}
+
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
 .actions {
   display: flex;
-  gap: 9px;
   flex-wrap: wrap;
-  margin-top: 18px;
+  gap: 9px;
+  margin-top: 20px;
 }
+
 .status {
+  padding: 13px;
   background: #203652;
   color: #c6d8f0;
-  padding: 12px;
-  border-radius: 8px;
+  border-radius: 9px;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
   overflow-wrap: anywhere;
 }
+
 .fine {
   font-size: 12px;
+  line-height: 1.7;
   color: var(--muted);
-  line-height: 1.6;
 }
+
+.previewBox {
+  width: 100%;
+  background: #f2f2f2;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
 #preview {
   width: 100%;
-  max-height: 75vh;
+  height: auto;
+  max-height: 78vh;
   object-fit: contain;
-  background: #f2f2f2;
-  border-radius: 9px;
   display: block;
 }
+
 #count {
   color: #9fc6ff;
   font-size: 13px;
   margin-top: 12px;
 }
-@media(max-width:850px) {
-  main { grid-template-columns: 1fr; padding: 12px; }
-  .panel { padding: 16px; }
-  header { padding: 18px; }
+
+@media(max-width: 850px) {
+  main {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  header {
+    padding: 18px;
+  }
 }
 </style>
 </head>
@@ -122,18 +179,28 @@ button:disabled { opacity: .5; cursor: default; }
 <header>
   <div>
     <h1>XG CHARTS · Chart Images Generator</h1>
-    <small>Kworb Charts · Kworb Worldwide · YouTube Trending · Direct PNG download</small>
+    <small>
+      Kworb Charts · Kworb Worldwide · YouTube Trending · Direct PNG download
+    </small>
   </div>
-  <button id="refresh" class="secondary">↻ Refresh Sheets</button>
+
+  <button id="refresh" class="secondary">
+    ↻ Refresh Sheets
+  </button>
 </header>
 
 <main>
+
   <section class="panel">
+
     <h2>1. Choose your ranking</h2>
 
-    <div class="status" id="status">Loading Google Sheets…</div>
+    <div id="status" class="status">
+      Loading Google Sheets…
+    </div>
 
     <label for="source">Source</label>
+
     <select id="source">
       <option value="kworb">Kworb Charts — Countries</option>
       <option value="worldwide">Kworb Worldwide — 8 charts</option>
@@ -147,48 +214,89 @@ button:disabled { opacity: .5; cursor: default; }
     <select id="chart"></select>
 
     <label for="format">Image size</label>
+
     <select id="format">
-      <option value="xwide">X · Horizontal (1600 × 900)</option>
-      <option value="auto">Auto · Height adapts (1200px wide)</option>
-      <option value="xportrait">X · Portrait (1200 × 1500)</option>
-      <option value="square">Square (1080 × 1080)</option>
-      <option value="igportrait">Instagram portrait (1080 × 1350)</option>
-      <option value="story">Story (1080 × 1920)</option>
+      <option value="xwide">
+        X · Horizontal (1600 × 900)
+      </option>
+
+      <option value="auto">
+        Auto · Height adapts (1200px wide)
+      </option>
+
+      <option value="xportrait">
+        X · Portrait (1200 × 1500)
+      </option>
+
+      <option value="square">
+        Instagram · Square (1080 × 1080)
+      </option>
+
+      <option value="igportrait">
+        Instagram · Portrait (1080 × 1350)
+      </option>
+
+      <option value="story">
+        Stories (1080 × 1920)
+      </option>
     </select>
 
     <label for="perpage">Rows per image</label>
+
     <select id="perpage">
+      <option value="all" selected>
+        All positions (auto pagination)
+      </option>
+
+      <option value="5">5</option>
       <option value="10">10</option>
       <option value="15">15</option>
       <option value="20">20</option>
-      <option value="all" selected>All positions (auto pagination if needed)</option>
     </select>
 
     <label for="page">Image page</label>
     <select id="page"></select>
 
     <div class="actions">
-      <button id="download">↓ Download PNG</button>
-      <button id="downloadAll" class="secondary">Download all pages</button>
+      <button id="download">
+        ↓ Download PNG
+      </button>
+
+      <button id="downloadAll" class="secondary">
+        Download all pages
+      </button>
     </div>
 
     <p class="fine">
-      Downloads directly to your device. No Google Slides,
-      no Google Drive files, no changes to your bots.
+      Images download directly to your device.
+      No Google Slides, no Drive files and no changes to your bots.
     </p>
+
   </section>
 
   <section class="panel">
+
     <h2>2. Image preview</h2>
-    <canvas id="preview" width="1600" height="900"></canvas>
+
+    <div class="previewBox">
+      <canvas id="preview" width="1600" height="900"></canvas>
+    </div>
+
     <div id="count"></div>
+
   </section>
+
 </main>
 
 <script>
 'use strict';
 
-const ID = '1CgnuCSeJ__iJRP4uYuom3TUAoH3G6zuXyrEfp9p9GIY';
+/* =========================================================
+   GOOGLE SHEETS
+========================================================= */
+
+const SPREADSHEET_ID =
+  '1CgnuCSeJ__iJRP4uYuom3TUAoH3G6zuXyrEfp9p9GIY';
 
 const SHEETS = {
   kworb: 'KworbCharts',
@@ -197,6 +305,7 @@ const SHEETS = {
 };
 
 const $ = id => document.getElementById(id);
+
 const DB = {};
 const ERRORS = {};
 
@@ -204,326 +313,585 @@ let groups = [];
 let current = null;
 let pages = [];
 
-const norm = s => String(s ?? '')
-  .toLowerCase()
-  .replace(/[^a-z0-9]/g, '');
+/* =========================================================
+   UTILITIES
+========================================================= */
 
-const val = (r, ...keys) => {
-  for (const k of keys) {
-    const v = r[norm(k)];
-    if (v !== undefined && v !== null && v !== '') return v;
-  }
-  return '';
-};
-
-const text = x => String(x ?? '').trim();
-
-const rank = x => {
-  const n = Number(text(x).replace(/[,#]/g, ''));
-  return Number.isFinite(n) && n > 0 ? n : 0;
-};
-
-function parseGVIZ(body) {
-  const a = body.indexOf('{');
-  const b = body.lastIndexOf('}');
-
-  if (a < 0 || b < a) throw Error('Invalid response');
-
-  const j = JSON.parse(body.slice(a, b + 1));
-
-  if (j.status === 'error') {
-    throw Error(j.errors?.map(e => e.message).join(', ') || 'Sheet error');
-  }
-
-  const t = j.table || {};
-
-  return [
-    (t.cols || []).map(c => c.label || c.id || ''),
-    ...(t.rows || []).map(r =>
-      (r.c || []).map(c => c?.f ?? c?.v ?? null)
-    )
-  ];
+function str(value) {
+  return String(value ?? '').trim();
 }
 
-function toObjects(m) {
-  const i = m.findIndex(r =>
-    r.some(x => x !== null && x !== '')
+function normalize(value) {
+  return str(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function value(row, ...names) {
+  for (const name of names) {
+    const result = row[normalize(name)];
+
+    if (
+      result !== undefined &&
+      result !== null &&
+      result !== ''
+    ) {
+      return result;
+    }
+  }
+
+  return '';
+}
+
+function numericRank(value) {
+  const n = Number(
+    str(value).replace(/[#,]/g, '')
   );
 
-  if (i < 0) return [];
-
-  const keys = m[i].map(norm);
-
-  return m.slice(i + 1)
-    .filter(r => r.some(x => x !== null && x !== ''))
-    .map(r =>
-      Object.fromEntries(
-        keys.map((k, j) => [k, r[j] ?? null])
-          .filter(x => x[0])
-      )
-    );
+  return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-function dateKey(v) {
-  if (v === null || v === undefined) return '';
+function changeText(value) {
+  const raw = str(value);
 
-  const s = text(v);
+  if (!raw) return '—';
 
-  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  // Preserve the value from Google Sheets.
+  // Examples: NE, NEW, +2, -7, 0.
 
-  if (m) {
-    return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  if (/^[+-]\d+$/.test(raw)) {
+    return raw;
   }
 
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-
-  if (m) {
-    return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+  if (/^\d+$/.test(raw)) {
+    return raw === '0' ? '0' : '+' + raw;
   }
 
-  m = s.match(/Date\((\d+),(\d+),(\d+)/);
+  return raw;
+}
+
+function dateKey(value) {
+  const s = str(value);
+
+  let m = s.match(
+    /^(\d{4})-(\d{1,2})-(\d{1,2})/
+  );
 
   if (m) {
-    return `${m[1]}-${String(+m[2] + 1).padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+    return (
+      m[1] + '-' +
+      m[2].padStart(2, '0') + '-' +
+      m[3].padStart(2, '0')
+    );
+  }
+
+  m = s.match(
+    /^Date\((\d+),(\d+),(\d+)/
+  );
+
+  if (m) {
+    return (
+      m[1] + '-' +
+      String(Number(m[2]) + 1).padStart(2, '0') + '-' +
+      String(m[3]).padStart(2, '0')
+    );
   }
 
   return '';
 }
 
-function timeKey(v) {
-  const s = text(v);
-  const m = s.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-
-  return m
-    ? +m[1] * 3600 + +m[2] * 60 + +(m[3] || 0)
-    : 0;
-}
-
-function latest(rows) {
-  return rows.map(r => dateKey(val(r, 'Date')))
+function latestDate(rows) {
+  return rows
+    .map(row => dateKey(value(row, 'Date')))
     .filter(Boolean)
     .sort()
     .pop() || '';
 }
 
-async function load() {
-  $('status').textContent = 'Loading Google Sheets…';
-
-  await Promise.all(
-    Object.entries(SHEETS).map(async ([key, name]) => {
-      try {
-        const url =
-          `https://docs.google.com/spreadsheets/d/${ID}/gviz/tq` +
-          `?tqx=out:json&headers=1&sheet=${encodeURIComponent(name)}` +
-          `&_=${Date.now()}`;
-
-        const r = await fetch(url, { cache: 'no-store' });
-
-        if (!r.ok) throw Error('HTTP ' + r.status);
-
-        DB[key] = toObjects(parseGVIZ(await r.text()));
-        delete ERRORS[key];
-
-      } catch (e) {
-        DB[key] = [];
-        ERRORS[key] = e.message;
-      }
-    })
+function timeKey(value) {
+  const m = str(value).match(
+    /(\d{1,2}):(\d{2})(?::(\d{2}))?/
   );
 
-  $('status').textContent = Object.entries(SHEETS)
-    .map(([k, n]) =>
-      `${n}: ${DB[k].length} records` +
-      (ERRORS[k] ? ' · ' + ERRORS[k] : '')
+  if (!m) return 0;
+
+  return (
+    Number(m[1]) * 3600 +
+    Number(m[2]) * 60 +
+    Number(m[3] || 0)
+  );
+}
+
+/* =========================================================
+   GOOGLE SHEETS READER
+========================================================= */
+
+function parseGVIZ(body) {
+  const start = body.indexOf('{');
+  const end = body.lastIndexOf('}');
+
+  if (start < 0 || end < start) {
+    throw new Error('Invalid Google Sheets response');
+  }
+
+  const json = JSON.parse(
+    body.slice(start, end + 1)
+  );
+
+  if (json.status === 'error') {
+    throw new Error(
+      json.errors?.map(e => e.message).join(', ') ||
+      'Google Sheets error'
+    );
+  }
+
+  const table = json.table || {};
+
+  return [
+    (table.cols || []).map(
+      col => col.label || col.id || ''
+    ),
+
+    ...(table.rows || []).map(row =>
+      (row.c || []).map(
+        cell => cell?.f ?? cell?.v ?? null
+      )
     )
-    .join(' | ');
+  ];
+}
+
+function toObjects(matrix) {
+  const headerIndex = matrix.findIndex(
+    row => row.some(
+      cell => cell !== null && cell !== ''
+    )
+  );
+
+  if (headerIndex < 0) return [];
+
+  const keys = matrix[headerIndex].map(normalize);
+
+  return matrix
+    .slice(headerIndex + 1)
+    .filter(row =>
+      row.some(
+        cell => cell !== null && cell !== ''
+      )
+    )
+    .map(row => {
+      const obj = {};
+
+      keys.forEach((key, index) => {
+        if (key) {
+          obj[key] = row[index] ?? null;
+        }
+      });
+
+      return obj;
+    });
+}
+
+async function loadSheets() {
+  $('status').textContent =
+    'Loading Google Sheets…';
+
+  await Promise.all(
+    Object.entries(SHEETS).map(
+      async ([key, sheetName]) => {
+
+        try {
+          const url =
+            'https://docs.google.com/spreadsheets/d/' +
+            SPREADSHEET_ID +
+            '/gviz/tq?tqx=out:json&headers=1&sheet=' +
+            encodeURIComponent(sheetName) +
+            '&_=' + Date.now();
+
+          const response = await fetch(
+            url,
+            { cache: 'no-store' }
+          );
+
+          if (!response.ok) {
+            throw new Error(
+              'HTTP ' + response.status
+            );
+          }
+
+          const body = await response.text();
+
+          DB[key] = toObjects(
+            parseGVIZ(body)
+          );
+
+          delete ERRORS[key];
+
+        } catch (error) {
+          DB[key] = [];
+          ERRORS[key] = error.message;
+        }
+      }
+    )
+  );
+
+  $('status').textContent =
+    Object.entries(SHEETS)
+      .map(([key, name]) => {
+        const count = DB[key]?.length || 0;
+
+        return (
+          name + ': ' + count + ' records' +
+          (ERRORS[key]
+            ? ' · ERROR: ' + ERRORS[key]
+            : '')
+        );
+      })
+      .join(' | ');
 
   rebuild();
 }
 
+/* =========================================================
+   BUILD GROUPS
+========================================================= */
+
 function makeGroups() {
-  const src = $('source').value;
-  const all = DB[src] || [];
-  const date = latest(all) || 'Current rankings';
+  const source = $('source').value;
+
+  const all = DB[source] || [];
 
   if (!all.length) return [];
 
   const map = new Map();
 
-  for (const [index, r] of all.entries()) {
-    const position = rank(
-      val(r, 'Current Rank', 'Rank', 'Position')
-    );
+  const date = latestDate(all) || 'Current';
 
-    if (!position) continue;
+  for (const [index, row] of all.entries()) {
 
     let title = '';
     let chart = '';
+    let platform = '';
     let region = '';
-    let key = '';
-    let col1 = '';
-    let col2 = '';
+    let position = 0;
+    let change = '—';
+    let groupKey = '';
+    let rowKey = '';
 
-    if (src === 'kworb') {
-      title = text(val(r, 'Title'));
-      chart = text(val(r, 'Chart Name'));
+    if (source === 'kworb') {
 
-      const platform = text(val(r, 'Platform'));
-
-      region = text(
-        val(r, 'Region', 'Country', 'Country / Region')
+      title = str(
+        value(row, 'Title')
       );
 
-      if (!title || !chart || !region) continue;
-
-      key = [title, platform, chart].join('\u001f');
-
-      col1 = '#' + position;
-      col2 = region;
-
-    } else if (src === 'worldwide') {
-      title = text(val(r, 'Title'));
-      chart = 'Worldwide & European Charts';
-
-      const specific = text(
-        val(r, 'Chart Name', 'Chart', 'Platform')
+      platform = str(
+        value(row, 'Platform')
       );
 
-      if (!title || !specific) continue;
-
-      key = [title, text(val(r, 'Type'))].join('\u001f');
-
-      col1 = [
-        text(val(r, 'Platform')),
-        specific,
-        text(val(r, 'Region'))
-      ].filter(Boolean).join(' · ');
-
-      col2 = '#' + position;
-      region = col1;
-
-    } else {
-      title = text(
-        val(r, 'Video Title', 'Title', 'Video Name')
+      chart = str(
+        value(row, 'Chart Name')
       );
 
-      chart = text(
-        val(r, 'Chart', 'Chart Name', 'Type')
+      region = str(
+        value(
+          row,
+          'Region',
+          'Country',
+          'Country / Region'
+        )
       );
 
-      region = text(
-        val(r, 'Country / Region', 'Region', 'Country')
+      position = numericRank(
+        value(
+          row,
+          'Current Rank',
+          'Rank',
+          'Position'
+        )
       );
 
-      if (!title || !chart || !region) continue;
+      change = changeText(
+        value(row, 'Change')
+      );
 
-      key = [
-        text(val(r, 'Video ID')) || title,
+      if (
+        !title ||
+        !platform ||
+        !chart ||
+        !region ||
+        !position
+      ) {
+        continue;
+      }
+
+      groupKey = [
+        title,
+        platform,
         chart
       ].join('\u001f');
 
-      col1 = '#' + position;
-      col2 = region;
+      rowKey = region;
+
+    } else if (source === 'worldwide') {
+
+      title = str(
+        value(row, 'Title')
+      );
+
+      platform = str(
+        value(row, 'Platform')
+      );
+
+      chart = str(
+        value(row, 'Chart Name', 'Chart')
+      );
+
+      region = str(
+        value(row, 'Region')
+      );
+
+      position = numericRank(
+        value(
+          row,
+          'Current Rank',
+          'Rank',
+          'Position'
+        )
+      );
+
+      change = changeText(
+        value(row, 'Change')
+      );
+
+      if (
+        !title ||
+        !chart ||
+        !position
+      ) {
+        continue;
+      }
+
+      groupKey = [
+        title,
+        str(value(row, 'Type'))
+      ].join('\u001f');
+
+      rowKey = [
+        platform,
+        region,
+        chart
+      ].join('\u001f');
+
+    } else if (source === 'youtube') {
+
+      title = str(
+        value(
+          row,
+          'Video Title',
+          'Title',
+          'Video Name'
+        )
+      );
+
+      platform = 'YouTube';
+
+      chart = str(
+        value(
+          row,
+          'Chart',
+          'Chart Name',
+          'Type'
+        )
+      );
+
+      region = str(
+        value(
+          row,
+          'Country / Region',
+          'Region',
+          'Country'
+        )
+      );
+
+      position = numericRank(
+        value(
+          row,
+          'Current Rank',
+          'Rank',
+          'Position'
+        )
+      );
+
+      change = changeText(
+        value(row, 'Change')
+      );
+
+      if (
+        !title ||
+        !chart ||
+        !region ||
+        !position
+      ) {
+        continue;
+      }
+
+      groupKey = [
+        str(value(row, 'Video ID')) || title,
+        chart
+      ].join('\u001f');
+
+      rowKey = region;
     }
 
-    if (!map.has(key)) {
-      map.set(key, {
-        source: src,
+    if (!map.has(groupKey)) {
+
+      const subtitle =
+        source === 'kworb'
+          ? platform + ' · ' + chart
+          : source === 'youtube'
+            ? 'YouTube Trending · ' + chart
+            : 'Worldwide & European Charts';
+
+      map.set(groupKey, {
+        source,
         title,
         chart,
+        platform,
+        subtitle,
         date,
-
-        subtitle:
-          src === 'kworb'
-            ? `${text(val(r, 'Platform'))} · ${chart}`
-            : src === 'youtube'
-              ? `YouTube Trending · ${chart}`
-              : 'iTunes & Apple Music · Worldwide / Europe',
-
         entries: new Map()
       });
     }
 
-    const g = map.get(key);
-    const time = timeKey(val(r, 'Time'));
-    const previous = g.entries.get(region);
+    const group = map.get(groupKey);
 
-    if (!previous || time >= previous.time) {
-      g.entries.set(region, {
-        cells:
-          src === 'kworb'
-            ? [
-                col1,
-                col2,
-                text(val(r, 'Change')) || '—'
-              ]
-            : [col1, col2],
+    const cells =
+      source === 'worldwide'
+        ? [
+            [
+              platform,
+              chart,
+              region
+            ].filter(Boolean).join(' · '),
 
+            '#' + position,
+
+            change
+          ]
+        : [
+            '#' + position,
+            region,
+            change
+          ];
+
+    const previous = group.entries.get(rowKey);
+
+    const currentTime = timeKey(
+      value(row, 'Time')
+    );
+
+    if (
+      !previous ||
+      currentTime >= previous.time
+    ) {
+      group.entries.set(rowKey, {
+        cells,
         position,
-        time,
+        time: currentTime,
         index
       });
     }
   }
 
   return [...map.values()]
-    .map(g => ({
-      ...g,
-      rows: [...g.entries.values()]
-        .sort((a, b) =>
-          g.source === 'worldwide'
-            ? a.cells[0].localeCompare(b.cells[0]) ||
-              a.position - b.position
-            : a.position - b.position ||
-              a.cells[1].localeCompare(b.cells[1])
-        )
-        .map(e => e.cells)
-    }))
+    .map(group => {
+
+      const entries = [...group.entries.values()];
+
+      entries.sort((a, b) => {
+        if (group.source === 'worldwide') {
+          return (
+            a.cells[0].localeCompare(b.cells[0]) ||
+            a.position - b.position
+          );
+        }
+
+        return (
+          a.position - b.position ||
+          a.cells[1].localeCompare(b.cells[1])
+        );
+      });
+
+      return {
+        ...group,
+        rows: entries.map(entry => entry.cells)
+      };
+    })
     .sort((a, b) =>
       a.title.localeCompare(b.title) ||
-      a.chart.localeCompare(b.chart) ||
       a.subtitle.localeCompare(b.subtitle)
     );
 }
 
-function setOptions(id, options, selected) {
-  const s = $(id);
-  s.replaceChildren();
+/* =========================================================
+   SELECTORS
+========================================================= */
 
-  for (const v of options) {
-    const o = document.createElement('option');
-    o.value = v;
-    o.textContent = v;
-    s.appendChild(o);
+function setOptions(id, options, selected = '') {
+  const select = $(id);
+
+  select.replaceChildren();
+
+  for (const optionValue of options) {
+    const option = document.createElement('option');
+
+    option.value = optionValue;
+    option.textContent = optionValue;
+
+    select.appendChild(option);
   }
 
-  if (options.includes(selected)) s.value = selected;
+  if (options.includes(selected)) {
+    select.value = selected;
+  }
 }
 
 function rebuild() {
-  const old = $('title').value;
+  const oldTitle = $('title').value;
+
   groups = makeGroups();
+
+  const titles = [
+    ...new Set(
+      groups.map(group => group.title)
+    )
+  ];
 
   setOptions(
     'title',
-    [...new Set(groups.map(g => g.title))],
-    old
+    titles,
+    oldTitle
   );
 
   selectTitle();
 }
 
 function selectTitle() {
-  const old = $('chart').value;
+  const oldChart = $('chart').value;
 
-  const list = groups.filter(
-    g => g.title === $('title').value
+  const available = groups.filter(
+    group => group.title === $('title').value
   );
+
+  const charts = [
+    ...new Set(
+      available.map(group => group.subtitle)
+    )
+  ];
 
   setOptions(
     'chart',
-    [...new Set(list.map(g => g.subtitle))],
-    old
+    charts,
+    oldChart
   );
 
   selectChart();
@@ -531,289 +899,538 @@ function selectTitle() {
 
 function selectChart() {
   current = groups.find(
-    g =>
-      g.title === $('title').value &&
-      g.subtitle === $('chart').value
+    group =>
+      group.title === $('title').value &&
+      group.subtitle === $('chart').value
   ) || null;
 
   updatePages();
 }
 
+/* =========================================================
+   IMAGE FORMATS
+========================================================= */
+
 function formatInfo() {
-  return {
+  const formats = {
     xwide: [1600, 900],
     auto: [1200, 0],
     xportrait: [1200, 1500],
     square: [1080, 1080],
     igportrait: [1080, 1350],
     story: [1080, 1920]
-  }[$('format').value];
+  };
+
+  return formats[$('format').value];
 }
 
 function updatePages() {
   pages = [];
 
-  if (current) {
-    const [w, h] = formatInfo();
+  if (current && current.rows.length) {
 
-    const header = Math.round(w * .235);
-    const footer = Math.round(w * .075);
-    const rh = Math.round(w * .039);
+    const [width, fixedHeight] = formatInfo();
 
-    const safe = Math.max(
+    const scale = width / 1200;
+
+    const top = Math.round(235 * scale);
+    const rowHeight = Math.round(47 * scale);
+    const footer = Math.round(85 * scale);
+
+    const maximumHeight =
+      fixedHeight || Math.round(2500 * scale);
+
+    const availableHeight =
+      maximumHeight - top - footer - rowHeight;
+
+    const safeRows = Math.max(
       1,
-      Math.floor(((h || 2500) - header - footer) / rh)
+      Math.floor(
+        availableHeight / rowHeight
+      )
     );
 
     const requested =
       $('perpage').value === 'all'
         ? 99999
-        : +$('perpage').value;
+        : Number($('perpage').value);
 
-    const size = Math.min(safe, requested);
+    const pageSize = Math.max(
+      1,
+      Math.min(safeRows, requested)
+    );
 
-    for (let i = 0; i < current.rows.length; i += size) {
-      pages.push(current.rows.slice(i, i + size));
+    for (
+      let i = 0;
+      i < current.rows.length;
+      i += pageSize
+    ) {
+      pages.push(
+        current.rows.slice(i, i + pageSize)
+      );
     }
   }
 
   setOptions(
     'page',
-    pages.map((_, i) => `Image ${i + 1} / ${pages.length}`)
+    pages.map(
+      (_, index) =>
+        `Image ${index + 1} / ${pages.length}`
+    )
   );
 
-  $('download').disabled =
-    $('downloadAll').disabled = !pages.length;
+  $('download').disabled = !pages.length;
+  $('downloadAll').disabled = !pages.length;
 
   render();
 }
 
-function fit(ctx, value, max, font, min = 16) {
-  let n = font;
+/* =========================================================
+   CANVAS UTILITIES
+========================================================= */
 
-  do {
-    ctx.font = `${n}px Arial`;
+function fittedFont(
+  context,
+  content,
+  maxWidth,
+  initialSize,
+  minimumSize
+) {
+  let size = initialSize;
 
-    if (ctx.measureText(value).width <= max) break;
+  while (size > minimumSize) {
+    context.font = `${size}px Arial`;
 
-    n -= 2;
-  } while (n > min);
+    if (
+      context.measureText(content).width <= maxWidth
+    ) {
+      break;
+    }
 
-  return n;
+    size -= 2;
+  }
+
+  return size;
 }
 
-function draw(pageIndex) {
+function drawImage(pageIndex) {
   if (!current || !pages.length) return null;
 
   const rows = pages[pageIndex] || pages[0];
-  const [W, fixedH] = formatInfo();
-  const scale = W / 1200;
 
-  const top = Math.round(235 * scale);
-  const rowH = Math.round(47 * scale);
-  const footer = Math.round(85 * scale);
+  const [width, fixedHeight] = formatInfo();
 
-  const H = fixedH || Math.max(
-    Math.round(W * .5625),
-    top + rowH * (rows.length + 1) + footer
-  );
+  const scale = width / 1200;
+
+  const S = number =>
+    Math.round(number * scale);
+
+  const tableTop = S(235);
+  const rowHeight = S(47);
+  const footerHeight = S(85);
+
+  const height =
+    fixedHeight ||
+    Math.max(
+      S(675),
+      tableTop +
+      rowHeight * (rows.length + 1) +
+      footerHeight
+    );
 
   const canvas = $('preview');
 
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = width;
+  canvas.height = height;
 
-  const c = canvas.getContext('2d');
-  const S = v => Math.round(v * scale);
+  const ctx = canvas.getContext('2d');
 
-  c.fillStyle = '#F2F2F2';
-  c.fillRect(0, 0, W, H);
+  /* Background */
 
-  c.fillStyle = '#277FF2';
-  c.fillRect(S(42), S(28), S(7), S(38));
+  ctx.fillStyle = '#F2F2F2';
+  ctx.fillRect(0, 0, width, height);
 
-  c.fillStyle = '#223A59';
-  c.font = `bold ${S(29)}px Arial`;
-  c.fillText('XG CHARTS', S(68), S(59));
+  /* Brand */
 
-  const title = `XG — ${current.title}`;
-
-  let fs = fit(
-    c,
-    title,
-    W - S(85),
-    S(43),
-    S(22)
+  ctx.fillStyle = '#277FF2';
+  ctx.fillRect(
+    S(42),
+    S(28),
+    S(7),
+    S(38)
   );
 
-  c.font = `bold ${fs}px Arial`;
-  c.fillText(title, S(42), S(132));
+  ctx.fillStyle = '#223A59';
+  ctx.font = `bold ${S(29)}px Arial`;
+
+  ctx.fillText(
+    'XG CHARTS',
+    S(68),
+    S(59)
+  );
+
+  /* Title */
+
+  const title = 'XG — ' + current.title;
+
+  const titleFont = fittedFont(
+    ctx,
+    title,
+    width - S(85),
+    S(43),
+    S(20)
+  );
+
+  ctx.font = `bold ${titleFont}px Arial`;
+
+  ctx.fillText(
+    title,
+    S(42),
+    S(132)
+  );
+
+  /* Subtitle */
 
   const subtitle =
-    `${current.subtitle} · ${current.date}` +
-    (pages.length > 1
-      ? ` · ${pageIndex + 1}/${pages.length}`
-      : '');
+    current.subtitle +
+    ' · ' +
+    current.date +
+    (
+      pages.length > 1
+        ? ` · ${pageIndex + 1}/${pages.length}`
+        : ''
+    );
 
-  fs = fit(
-    c,
+  const subtitleFont = fittedFont(
+    ctx,
     subtitle,
-    W - S(85),
+    width - S(85),
     S(23),
     S(13)
   );
 
-  c.font = `${fs}px Arial`;
-  c.fillStyle = '#536A86';
-  c.fillText(subtitle, S(42), S(178));
+  ctx.font = `${subtitleFont}px Arial`;
+  ctx.fillStyle = '#536A86';
 
-  c.fillStyle = '#E4EFFD';
-  c.fillRect(S(40), top, W - S(80), rowH);
+  ctx.fillText(
+    subtitle,
+    S(42),
+    S(178)
+  );
 
-  const wide = current.source === 'worldwide';
-  const kworb = current.source === 'kworb';
+  /* Table header */
 
-  const xs = wide
-    ? [S(54), S(945)]
-    : kworb
-      ? [S(54), S(290), S(990)]
-      : [S(54), S(390)];
+  ctx.fillStyle = '#E4EFFD';
 
-  const heads = wide
-    ? ['CHART', 'RANK']
-    : kworb
-      ? ['RANK', 'COUNTRY / REGION', 'CHANGE']
-      : ['RANK', 'COUNTRY / REGION'];
+  ctx.fillRect(
+    S(40),
+    tableTop,
+    width - S(80),
+    rowHeight
+  );
 
-  c.fillStyle = '#223A59';
-  c.font = `bold ${S(20)}px Arial`;
+  const worldwide =
+    current.source === 'worldwide';
 
-  heads.forEach((x, i) => {
-    c.fillText(x, xs[i], top + S(31));
+  const columns = worldwide
+    ? ['CHART', 'RANK', 'CHANGE']
+    : ['RANK', 'COUNTRY / REGION', 'CHANGE'];
+
+  const columnX = worldwide
+    ? [S(54), S(890), S(1050)]
+    : [S(54), S(260), S(990)];
+
+  ctx.fillStyle = '#223A59';
+  ctx.font = `bold ${S(19)}px Arial`;
+
+  columns.forEach((heading, index) => {
+    ctx.fillText(
+      heading,
+      columnX[index],
+      tableTop + S(31)
+    );
   });
 
-  rows.forEach((r, i) => {
-    const y = top + rowH * (i + 1);
+  /* Rows */
 
-    c.fillStyle = i % 2 ? '#F2F2F2' : '#FFFFFF';
-    c.fillRect(S(40), y, W - S(80), rowH);
+  rows.forEach((row, rowIndex) => {
 
-    r.forEach((v, j) => {
-      const txt = text(v);
+    const y =
+      tableTop +
+      rowHeight * (rowIndex + 1);
 
-      const max = wide
-        ? (j === 0 ? S(840) : S(160))
-        : kworb
-          ? (j === 0 ? S(190) : j === 1 ? S(650) : S(150))
-          : (j === 0 ? S(280) : S(750));
+    ctx.fillStyle =
+      rowIndex % 2 === 0
+        ? '#FFFFFF'
+        : '#F2F2F2';
 
-      const size = fit(c, txt, max, S(25), S(14));
+    ctx.fillRect(
+      S(40),
+      y,
+      width - S(80),
+      rowHeight
+    );
 
-      c.font =
-        `${(j === 0 && !wide) || (j === 1 && wide) ? 'bold ' : ''}` +
-        `${size}px Arial`;
+    row.forEach((cell, cellIndex) => {
 
-      c.fillStyle = txt.startsWith('#')
-        ? '#087F68'
-        : kworb && j === 2
-          ? txt.startsWith('+')
-            ? '#087F68'
-            : txt.startsWith('-')
-              ? '#C24755'
-              : '#277FF2'
-          : '#223A59';
+      const content = str(cell);
 
-      c.fillText(txt, xs[j], y + S(32));
+      const maxWidth = worldwide
+        ? (
+            cellIndex === 0
+              ? S(810)
+              : S(125)
+          )
+        : (
+            cellIndex === 0
+              ? S(180)
+              : cellIndex === 1
+                ? S(700)
+                : S(145)
+          );
+
+      const fontSize = fittedFont(
+        ctx,
+        content,
+        maxWidth,
+        S(25),
+        S(14)
+      );
+
+      ctx.font =
+        `${cellIndex === 0 ? 'bold ' : ''}` +
+        `${fontSize}px Arial`;
+
+      if (cellIndex === 2) {
+
+        if (content.startsWith('+')) {
+          ctx.fillStyle = '#087F68';
+
+        } else if (content.startsWith('-')) {
+          ctx.fillStyle = '#C24755';
+
+        } else if (
+          content.toUpperCase() === 'NE' ||
+          content.toUpperCase() === 'NEW'
+        ) {
+          ctx.fillStyle = '#277FF2';
+
+        } else {
+          ctx.fillStyle = '#223A59';
+        }
+
+      } else if (content.startsWith('#')) {
+
+        ctx.fillStyle = '#087F68';
+
+      } else {
+
+        ctx.fillStyle = '#223A59';
+      }
+
+      ctx.fillText(
+        content,
+        columnX[cellIndex],
+        y + S(32)
+      );
     });
   });
 
-  c.fillStyle = '#CFDDEC';
-  c.fillRect(S(40), H - S(62), W - S(80), S(2));
+  /* Footer */
 
-  c.fillStyle = '#277FF2';
-  c.font = `bold ${S(23)}px Arial`;
-  c.fillText('xgcharts.com', S(42), H - S(23));
+  ctx.fillStyle = '#CFDDEC';
+
+  ctx.fillRect(
+    S(40),
+    height - S(62),
+    width - S(80),
+    S(2)
+  );
+
+  ctx.fillStyle = '#277FF2';
+
+  ctx.font = `bold ${S(23)}px Arial`;
+
+  ctx.fillText(
+    'xgcharts.com',
+    S(42),
+    height - S(23)
+  );
 
   return canvas;
 }
 
+/* =========================================================
+   PREVIEW
+========================================================= */
+
 function render() {
-  if (!current) {
+  if (!current || !pages.length) {
+
     $('count').textContent =
-      'No chart entries found. Check sheet access and available rankings.';
+      'No current ranking positions available for this source.';
 
-    const c = $('preview');
-    const x = c.getContext('2d');
+    const canvas = $('preview');
+    const ctx = canvas.getContext('2d');
 
-    x.clearRect(0, 0, c.width, c.height);
+    ctx.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
     return;
   }
 
-  const i = Math.max(0, $('page').selectedIndex);
+  const pageIndex = Math.max(
+    0,
+    $('page').selectedIndex
+  );
 
-  draw(i);
+  drawImage(pageIndex);
 
   $('count').textContent =
-    `${current.rows.length} positions · ` +
-    `${pages.length} image(s) · ${current.date}`;
+    current.rows.length +
+    ' positions · ' +
+    pages.length +
+    ' image(s) · ' +
+    current.date;
 }
 
-function filename(i) {
-  return (
-    `XG-Charts-${current.source}-${current.title}-` +
-    `${current.subtitle}-${current.date}-` +
-    `${i + 1}-of-${pages.length}.png`
-  )
+/* =========================================================
+   DOWNLOAD PNG
+========================================================= */
+
+function fileName(index) {
+  const raw =
+    'XG-Charts-' +
+    current.source + '-' +
+    current.title + '-' +
+    current.subtitle + '-' +
+    current.date + '-' +
+    (index + 1) +
+    '-of-' +
+    pages.length +
+    '.png';
+
+  return raw
     .normalize('NFKD')
     .replace(/[^a-zA-Z0-9._-]+/g, '-')
     .slice(0, 170);
 }
 
-async function download(i) {
-  const canvas = draw(i);
+async function downloadPNG(index) {
+  const canvas = drawImage(index);
 
   if (!canvas) return;
 
   const blob = await new Promise(resolve =>
-    canvas.toBlob(resolve, 'image/png')
+    canvas.toBlob(
+      resolve,
+      'image/png'
+    )
   );
 
-  if (!blob) throw Error('PNG export failed');
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-
-  a.href = url;
-  a.download = filename(i);
-
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  setTimeout(() => URL.revokeObjectURL(url), 15000);
-}
-
-$('refresh').onclick = load;
-$('source').onchange = rebuild;
-$('title').onchange = selectTitle;
-$('chart').onchange = selectChart;
-$('format').onchange = updatePages;
-$('perpage').onchange = updatePages;
-$('page').onchange = render;
-
-$('download').onclick = () =>
-  download(Math.max(0, $('page').selectedIndex));
-
-$('downloadAll').onclick = async () => {
-  for (let i = 0; i < pages.length; i++) {
-    await download(i);
-    await new Promise(r => setTimeout(r, 400));
+  if (!blob) {
+    throw new Error(
+      'Could not generate PNG'
+    );
   }
 
-  render();
-};
+  const url = URL.createObjectURL(blob);
 
-load();
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = fileName(index);
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(
+    () => URL.revokeObjectURL(url),
+    15000
+  );
+}
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+$('refresh').addEventListener(
+  'click',
+  loadSheets
+);
+
+$('source').addEventListener(
+  'change',
+  rebuild
+);
+
+$('title').addEventListener(
+  'change',
+  selectTitle
+);
+
+$('chart').addEventListener(
+  'change',
+  selectChart
+);
+
+$('format').addEventListener(
+  'change',
+  updatePages
+);
+
+$('perpage').addEventListener(
+  'change',
+  updatePages
+);
+
+$('page').addEventListener(
+  'change',
+  render
+);
+
+$('download').addEventListener(
+  'click',
+  () => {
+    const index = Math.max(
+      0,
+      $('page').selectedIndex
+    );
+
+    downloadPNG(index);
+  }
+);
+
+$('downloadAll').addEventListener(
+  'click',
+  async () => {
+    for (
+      let i = 0;
+      i < pages.length;
+      i++
+    ) {
+      await downloadPNG(i);
+
+      await new Promise(
+        resolve => setTimeout(resolve, 400)
+      );
+    }
+
+    render();
+  }
+);
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+loadSheets();
+
 </script>
 
 </body>
